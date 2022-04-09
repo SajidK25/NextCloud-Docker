@@ -48,7 +48,7 @@ bae385bee48b        redis:apache       "/entrypoint.sh apac…"   12 minutes ago
 Navigate to `http://localhost:8088` in your web browser to access the installed
 Nextcloud service.
 
-![page](005. Create admin account.png)
+![page](1_Create_admin_account.png)
 
 Stop and remove the containers
 
