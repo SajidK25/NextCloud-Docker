@@ -72,5 +72,7 @@ To install extra apps, click your user profile icon in the top-right corner. Cho
 
 3. Get to work!
 ![page](7_Onlyoffice-working.png)
+
+## Stop and remove the containers
 ```
 $ docker-compose down
