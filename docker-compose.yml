@@ -5,7 +5,7 @@ services:
     image: postgres
     restart: always
     volumes:
-      - db:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB_FILE=/run/secrets/postgres_db
       - POSTGRES_USER_FILE=/run/secrets/postgres_user
@@ -15,14 +15,32 @@ services:
       - postgres_password
       - postgres_user
 
+  redis:
+    image: redis:alpine
+    restart: always
+    networks:
+      - redisnet
+    expose:
+      - 6379
+    environment:
+      - REDIS_HOST_PASSWORD_FILE=/run/secrets/redis_host_password
+    secrets:
+      - redis_host_password
+  
   app:
     image: nextcloud
     restart: always
     ports:
       - 8080:80
     volumes:
-      - nextcloud:/var/www/html
+      - nc_data:/var/www/html
+    networks:
+      - redisnet
+      - dbnet
     environment:
+      - REDIS_HOST=redis
+      - REDIS_HOST_PORT=6379
+      - REDIS_HOST_PASSWORD_FILE=/run/secrets/redis_host_password
       - POSTGRES_HOST=db
       - POSTGRES_DB_FILE=/run/secrets/postgres_db
       - POSTGRES_USER_FILE=/run/secrets/postgres_user
@@ -31,6 +49,7 @@ services:
       - NEXTCLOUD_ADMIN_USER_FILE=/run/secrets/nextcloud_admin_user
     depends_on:
       - db
+      - redis
     secrets:
       - nextcloud_admin_password
       - nextcloud_admin_user
@@ -39,17 +58,23 @@ services:
       - postgres_user
 
 volumes:
-  db:
-  nextcloud:
+  db_data:
+  nc_data:
+
+networks:
+  dbnet:
+  redisnet:
 
 secrets:
   nextcloud_admin_password:
-    file: ./nextcloud_admin_password.txt # put admin password to this file
+    file: ./nextcloud_admin_password.txt 
   nextcloud_admin_user:
-    file: ./nextcloud_admin_user.txt # put admin username to this file
+    file: ./nextcloud_admin_user.txt 
   postgres_db:
-    file: ./postgres_db.txt # put postgresql db name to this file
+    file: ./postgres_db.txt 
   postgres_password:
-    file: ./postgres_password.txt # put postgresql password to this file
+    file: ./postgres_password.txt 
   postgres_user:
-    file: ./postgres_user.txt # put postgresql username to this file
+    file: ./postgres_user.txt 
+  redis_host_password:
+    file: ./redis_host_password.txt
